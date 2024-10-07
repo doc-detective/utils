@@ -1,3 +1,5 @@
+# cURL to httpRequest Converter
+
 This utility helps convert curl commands to Doc Detective httpRequest steps. It's a barebones tool, but it works well, identifying URLs, headers, and request body objects. It doesn't do *any* validation.
 
 1. Download `curl_to_dd.html`.
