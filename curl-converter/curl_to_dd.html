@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CURL to Doc Detective Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #output {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>CURL to httpRequest Converter</h1>
+    <p>Enter your CURL command below:</p>
+    <textarea id="curlInput" placeholder="Enter your CURL command here..."></textarea>
+    <button onclick="convertCurl()">Convert</button>
+    <h2>Doc Detective httpRequest Step:</h2>
+    <pre id="output"></pre>
+
+    <script>
+    function convertCurl() {
+        const curlCommand = document.getElementById('curlInput').value;
+        const output = document.getElementById('output');
+
+        // Parse the CURL command
+        const urlMatch = curlCommand.match(/['"]([^'"\n\s]+)['"]/);
+        const methodMatch = curlCommand.match(/-X\s+(\w+)/i);
+        const headerMatches = curlCommand.match(/-H\s+['"]([^'""]+)['"]/g);
+        const dataMatch = curlCommand.match(/-d\s+['"](\{[\w\W]+?\})['"]/);
+
+        // Create the httpRequest step object
+        const httpRequest = {
+            action: "httpRequest",
+            url: urlMatch ? urlMatch[1] : "",
+            method: methodMatch ? methodMatch[1].toLowerCase() : "get"
+        };
+
+        // Add headers if present
+        if (headerMatches) {
+            httpRequest.requestHeaders = {};
+            headerMatches.forEach(match => {
+                const headerParts = match.match(/-H\s+['"]([^:]+):\s*(.+)['"]/);
+                const key = headerParts[1];
+                const value = headerParts[2];
+                httpRequest.requestHeaders[key] = value;
+            });
+        }
+
+        // Add request data if present
+        if (dataMatch) {
+          const match = dataMatch[1].replaceAll('"\'"', '"');
+            try {
+                httpRequest.requestData = JSON.parse(match);
+            } catch (e) {
+                httpRequest.requestData = match;
+            }
+        }
+
+        // Output the result
+        output.textContent = JSON.stringify(httpRequest);
+    }
+    </script>
+</body>
+</html>
